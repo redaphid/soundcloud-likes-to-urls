@@ -1,0 +1,24 @@
+{
+  "name": "soundcloud-likes-to-urls",
+  "version": "1.0.0",
+  "description": "",
+  "main": "hax.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/redaphid/soundcloud-likes-to-urls.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/redaphid/soundcloud-likes-to-urls/issues"
+  },
+  "homepage": "https://github.com/redaphid/soundcloud-likes-to-urls#readme",
+  "dependencies": {
+    "lodash": "^4.17.4",
+    "request": "^2.81.0"
+  }
+}

@@ -5,12 +5,31 @@
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.1/angular-cookies.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.js"></script>
     <script>
-      function getLikes(user, $scope, $http) {
-        $http.get('https://api.soundcloud.com/e1/users/'+user.id+'/likes?oauth_token=' + $scope.apiKey)
+      function getLikes(user, $scope, $http, offset, limit) {
+        offset = offset || 0
+        limit = limit || 100
+        $http.get('https://api-v2.soundcloud.com/users/'+user.id+'/track_likes?app_version=1490962962&oauth_token=' + $scope.apiKey)
           .then(function(response){
             console.log(response)
-            $scope.likes = _.compact(_.map(response.data, 'track.permalink_url')).join('\n')
+
+            $scope.likes = _.compact(_.map(response.data.collection, 'track.permalink_url')).join('\n')
+
+            if(response.data.length === 0) {
+              return
+            }
+
+            $scope.rawLikes = $scope.rawLikes || []
+            $scope.rawLikes = $scope.rawLikes.concat(response.data)
+            setTimeout(function(){
+              getLikes(user, $scope, $http, offset + response.data.length)
+            }, _.random(150, 500))
+
           })
+          // .catch(function(){
+          //   setTimeout(function(){
+          //     getLikes(user, $scope, $http, offset + 1, 1)
+          //   }, _.random(150, 500))
+          // })
       }
 
       function GetSoundcloudUrls($scope, $http, $cookies) {
@@ -86,7 +105,7 @@
         <input ng-model="apiKey">
         <button ng-if="apiKey" ng-click="getUrls()">Get Urls</button>
       </form>
-      <h3 ng-if="user">Sup, {{user.username}}. Getting your likes.</h3>
+      <h3 ng-if="user">Sup, {{user.username}}. Getting your likes. <span ng-if="rawLikes">({{rawLikes.length}})</span></h3>
       <textarea ng-if="likes">{{likes}}</textarea>
     </div>
   </body>
