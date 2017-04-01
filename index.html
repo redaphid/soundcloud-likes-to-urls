@@ -2,18 +2,32 @@
 <html>
   <head>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.1/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.1/angular-cookies.js"></script>
     <script>
+      function getLikes(user, $scope, $http) {
+        $http.get('https://api.soundcloud.com/e1/users/'+user.id+'/playlist_likes?oauth_token=' + $scope.apiKey)
+          .then(function(response){
+            console.log(response)
+          })
+      }
 
-      function GetSoundcloudUrls($scope, $http) {
+      function GetSoundcloudUrls($scope, $http, $cookies) {
+
+        if($cookies.get('apiKey')) {
+          $scope.apiKey = $cookies.get('apiKey')
+        }
+
         $scope.getUrls = function(){
+          $cookies.put('apiKey', $scope.apiKey)
           $http.get('https://api.soundcloud.com/me?oauth_token=' + $scope.apiKey)
-            .then(function(response){
+            .then( function(response){
               $scope.user = response.data
+              getLikes(response.data, $scope, $http)
             })
         }
       }
 
-      var app = angular.module('soundcloud', []);
+      var app = angular.module('soundcloud', ['ngCookies']);
       app.controller('GetSoundcloudUrls', GetSoundcloudUrls);
 
     </script>
@@ -25,7 +39,8 @@
         <input ng-model="apiKey">
         <button ng-if="apiKey" ng-click="getUrls()">Get Urls</button>
       </form>
-      <h3 ng-if="user">Sup, {{user.username}}</h3>
+      <h3 ng-if="user">Sup, {{user.username}}. Getting your likes.</h3>
+
     </div>
   </body>
 
