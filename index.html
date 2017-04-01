@@ -3,11 +3,13 @@
   <head>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.1/angular.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.1/angular-cookies.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.js"></script>
     <script>
       function getLikes(user, $scope, $http) {
-        $http.get('https://api.soundcloud.com/e1/users/'+user.id+'/playlist_likes?oauth_token=' + $scope.apiKey)
+        $http.get('https://api.soundcloud.com/e1/users/'+user.id+'/likes?oauth_token=' + $scope.apiKey)
           .then(function(response){
             console.log(response)
+            $scope.likes = _.compact(_.map(response.data, 'track.permalink_url')).join('\n')
           })
       }
 
@@ -18,6 +20,7 @@
         }
 
         $scope.getUrls = function(){
+          $scope.apiKey = $scope.apiKey.replace(/['"]+/g, '')
           $cookies.put('apiKey', $scope.apiKey)
           $http.get('https://api.soundcloud.com/me?oauth_token=' + $scope.apiKey)
             .then( function(response){
@@ -31,16 +34,60 @@
       app.controller('GetSoundcloudUrls', GetSoundcloudUrls);
 
     </script>
+    <style>
+      body, html {
+        height: 100%;
+        width: 100%;
+      }
+      .main {
+        display: flex;
+        flex-direction: column;
+        width:90%;
+        height:100%;
+      }
+      textarea {
+        flex: 1
+      }
+      pre {
+        background-color: #eee;
+        font-family: monospace;
+      }
+    </style>
   </head>
   <body ng-app="soundcloud">
     <div class="main" ng-controller="GetSoundcloudUrls">
+      <div class="directions">
+        <h3> directions </h3>
+        <ol>
+          <li> go to <a href="https://soundcloud.com" target="_blank">Soundcloud</a>
+          <li> right-click on the site. click 'inspect' </li>
+          <li> click on the 'console' tab </li>
+          <li> copy and paste this code into it, and press enter </li>
+        </ol>
+        <pre>
+          function findOauthToken() {
+            var oauthToken;
+            document.cookie.split('; ').forEach(function(cookie){
+                var keyValue = cookie.split('=')
+                if(keyValue[0] === 'oauth_token') {
+                   oauthToken = keyValue[1]
+                   return
+                }
+            })
+            return oauthToken
+          }
+
+          console.log('----- COPY AND PASTE VALUE BELOW INTO API KEY -----')
+          findOauthToken()
+        </pre>
+      </div>
       <form>
         <label for="apiKey">Paste API key here</label>
         <input ng-model="apiKey">
         <button ng-if="apiKey" ng-click="getUrls()">Get Urls</button>
       </form>
       <h3 ng-if="user">Sup, {{user.username}}. Getting your likes.</h3>
-
+      <textarea ng-if="likes">{{likes}}</textarea>
     </div>
   </body>
 
