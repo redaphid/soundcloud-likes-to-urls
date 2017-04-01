@@ -1,22 +1,32 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <script src="https://connect.soundcloud.com/sdk/sdk-3.1.2.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.1/angular.min.js"></script>
     <script>
-    SC.initialize({
-      client_id: 'YOUR_CLIENT_ID',
-      redirect_uri: 'http://example.com/callback'
-    });
 
-    // initiate auth popup
-    SC.connect().then(function() {
-      return SC.get('/me');
-    }).then(function(me) {
-      alert('Hello, ' + me.username);
-    });
+      function GetSoundcloudUrls($scope, $http) {
+        $scope.getUrls = function(){
+          $http.get('https://api.soundcloud.com/me?oauth_token=' + $scope.apiKey)
+            .then(function(response){
+              $scope.user = response.data
+            })
+        }
+      }
+
+      var app = angular.module('soundcloud', []);
+      app.controller('GetSoundcloudUrls', GetSoundcloudUrls);
+
     </script>
   </head>
-  <body>
-    <h1>Hi</h1>
+  <body ng-app="soundcloud">
+    <div class="main" ng-controller="GetSoundcloudUrls">
+      <form>
+        <label for="apiKey">Paste API key here</label>
+        <input ng-model="apiKey">
+        <button ng-if="apiKey" ng-click="getUrls()">Get Urls</button>
+      </form>
+      <h3 ng-if="user">Sup, {{user.username}}</h3>
+    </div>
   </body>
+
 </html>
